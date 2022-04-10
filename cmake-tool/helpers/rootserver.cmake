@@ -85,13 +85,13 @@ function(DeclareRootserver rootservername)
                 $<TARGET_FILE:${rootservername}>
                 ${rootservername}
         )
-    elseif(KernelArchARM OR KernelArchRiscV)
+    elseif(KernelArchARM OR KernelArchRiscV OR KernelArchLoongarch)
         set(
             IMAGE_NAME
             "${CMAKE_BINARY_DIR}/images/${rootservername}-image-${KernelArch}-${KernelPlatform}"
         )
         set(elf_target_file $<TARGET_FILE:elfloader>)
-        if(KernelArchRiscV)
+        if(KernelArchRiscV OR KernelArchLoongarch)
             if(UseRiscVOpenSBI)
                 # When using OpenSBI, the whole system image (usually consisting
                 # of the ELF-Loader, a device tree, the kernel, and a userland)
