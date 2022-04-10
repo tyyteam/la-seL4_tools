@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 3.7.2)
 
 project(elfloader C ASM)
 
-if(KernelArchX86)
+if(KernelArchX86 OR KernelArchLoongarch)
     # This project is only used on Arm or RISC-V
     return()
 endif()
