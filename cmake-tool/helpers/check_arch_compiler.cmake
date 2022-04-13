@@ -94,16 +94,13 @@ function(check_arch_gcc)
         message(SEND_ERROR "KernelSel4Arch is not set to a valid arch")
     endif()
 
-    set(arch_test "
-#if ${compiler_variable}
-    int main() {return 0;}
-#else
-#error Invalid arch
-#endif
-    ") 
-    # set(CMAKE_C_FLAGS "-march=loongarch64 -mabi=lp64s")
+    if(NOT ${compiler_variable} STREQUAL "")
+        set(arch_test "int main() {return 0;}") 
+    else()
+        set(arch_test "Invalid arch") 
+    endif()    
+
     check_c_source_compiles("${arch_test}" compiler_arch_test )
-    # set(compiler_arch_test "ON")
     if(NOT compiler_arch_test)
         message(SEND_ERROR "Compiler: ${CMAKE_C_COMPILER} isn't for seL4_arch: ${KernelSel4Arch}")
     endif()

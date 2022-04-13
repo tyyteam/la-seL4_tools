@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 3.7.2)
 
 project(elfloader C ASM)
 
-if(KernelArchX86 OR KernelArchLoongarch)
+if(KernelArchX86)# OR KernelArchLoongarch
     # This project is only used on Arm or RISC-V
     return()
 endif()
@@ -95,9 +95,11 @@ add_config_library(elfloader "${configure_string}")
 
 add_compile_options(-D_XOPEN_SOURCE=700 -ffreestanding -Wall -Werror -W -Wextra)
 set(linkerScript "${CMAKE_CURRENT_LIST_DIR}/src/arch-${KernelArch}/linker.lds")
+
 if(KernelArchRiscV)
     add_compile_options(-mcmodel=medany)
 endif()
+
 
 if(ElfloaderArmV8LeaveAarch64)
     # We need to build a aarch64 assembly file during an aarch32 build. We have
@@ -267,7 +269,6 @@ MakeCPIO(archive.o "${cpio_files}" CPIO_SYMBOL _archive_start)
 set(PLATFORM_HEADER_DIR "${CMAKE_CURRENT_BINARY_DIR}/gen_headers")
 set(PLATFORM_INFO_H "${PLATFORM_HEADER_DIR}/platform_info.h")
 set(IMAGE_START_ADDR_H "${PLATFORM_HEADER_DIR}/image_start_addr.h")
-
 if(NOT "${IMAGE_START_ADDR}" STREQUAL "")
     # Generate static header files.  Their timestamps will change only if
     # their contents have changed on subsequent CMake reruns.
@@ -322,7 +323,6 @@ else()
     )
 
 endif()
-
 if(DEFINED KernelDTBPath)
     get_filename_component(KernelTools ${HARDWARE_GEN_PATH} DIRECTORY)
     set(config_file "${KernelTools}/hardware.yml")
