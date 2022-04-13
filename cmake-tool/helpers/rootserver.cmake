@@ -85,7 +85,15 @@ function(DeclareRootserver rootservername)
                 $<TARGET_FILE:${rootservername}>
                 ${rootservername}
         )
-    elseif(KernelArchARM OR KernelArchRiscV OR KernelArchLoongarch)
+    elseif(KernelArchLoongarch)
+    	# message(FATAL_ERROR "Invalid PLATFORM \"${CMAKE_BINARY_DIR}\"")
+    	set(
+            IMAGE_NAME
+            "${CMAKE_BINARY_DIR}/images/${rootservername}-image-${KernelArch}-${KernelPlatform}"
+        )
+        set(elf_target_file $<TARGET_FILE:elfloader>)
+        add_custom_target(rootserver_image ALL DEPENDS "${IMAGE_NAME}" elfloader ${rootservername})
+    elseif(KernelArchARM OR KernelArchRiscV)
         set(
             IMAGE_NAME
             "${CMAKE_BINARY_DIR}/images/${rootservername}-image-${KernelArch}-${KernelPlatform}"
