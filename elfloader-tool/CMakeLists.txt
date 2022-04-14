@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 3.7.2)
 
 project(elfloader C ASM)
 
-if(KernelArchX86)# OR KernelArchLoongarch
+if(KernelArchX86) # OR KernelArchLoongarch
     # This project is only used on Arm or RISC-V
     return()
 endif()
@@ -22,7 +22,7 @@ config_choice(
     ElfloaderImage
     ELFLOADER_IMAGE
     "Boot image type"
-    "elf;ElfloaderImageELF;IMAGE_ELF;KernelArchARM OR KernelArchRiscV"
+    "elf;ElfloaderImageELF;IMAGE_ELF;KernelArchARM OR KernelArchRiscV OR KernelArchLoongarch"
     "binary;ElfloaderImageBinary;IMAGE_BINARY;KernelArchARM OR KernelArchRiscV"
     "efi;ElfloaderImageEFI;IMAGE_EFI;KernelArchARM"
     "uimage;ElfloaderImageUimage;IMAGE_UIMAGE;KernelArchARM"
@@ -232,6 +232,7 @@ list(SORT files)
 
 set(cpio_files "")
 list(APPEND cpio_files "$<TARGET_FILE:kernel.elf>")
+
 if(ElfloaderIncludeDtb)
     list(APPEND cpio_files "${KernelDTBPath}")
 endif()
