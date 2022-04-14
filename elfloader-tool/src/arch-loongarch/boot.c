@@ -32,7 +32,7 @@
 
 #define PTE_PPN0_SHIFT 10
 
-#if __riscv_xlen == 32
+#if __loongarch_xlen == 32
 #define PT_INDEX_BITS  10
 #else
 #define PT_INDEX_BITS  9
@@ -52,7 +52,7 @@ struct image_info kernel_info;
 struct image_info user_info;
 
 unsigned long l1pt[PTES_PER_PT] __attribute__((aligned(4096)));
-#if __riscv_xlen == 64
+#if __loongarch_xlen == 64
 unsigned long l2pt[PTES_PER_PT] __attribute__((aligned(4096)));
 unsigned long l2pt_elf[PTES_PER_PT] __attribute__((aligned(4096)));
 #endif
@@ -96,7 +96,7 @@ static int map_kernel_window(struct image_info *kernel_info)
 
     index = GET_PT_INDEX((uintptr_t)_text, PT_LEVEL_1);
 
-#if __riscv_xlen == 32
+#if __loongarch_xlen == 32
     lpt = l1pt;
 #else
     lpt = l2pt_elf;
@@ -119,7 +119,7 @@ static int map_kernel_window(struct image_info *kernel_info)
 
     index = GET_PT_INDEX(kernel_info->virt_region_start, PT_LEVEL_1);
 
-#if __riscv_xlen == 64
+#if __loongarch_xlen == 64
     lpt = l2pt;
     l1pt[index] = PTE_CREATE_NEXT((uintptr_t)l2pt);
     index = GET_PT_INDEX(kernel_info->virt_region_start, PT_LEVEL_2);
