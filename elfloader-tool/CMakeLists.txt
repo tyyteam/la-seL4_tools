@@ -344,7 +344,6 @@ if(DEFINED KernelDTBPath)
     )
     set_property(SOURCE src/drivers/driver.c PROPERTY OBJECT_DEPENDS ${DEVICES_GEN_H})
 endif()
-# test
 # Generate linker script
 separate_arguments(c_arguments NATIVE_COMMAND "${CMAKE_C_FLAGS}")
 # Add extra compilation flags required for clang
