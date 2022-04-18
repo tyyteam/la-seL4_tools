@@ -54,7 +54,7 @@ macro(add_default_compilation_options)
     # Don't allow unaligned data store/load instructions as this will cause an alignment
     # fault on any seL4 memory regions that are uncached as the mapping attributes the kernel
     # uses causes alignment checks to be enabled.
-    if(KernelSel4ArchAarch64 OR KernelSel4ArchLoongarch64)
+    if(KernelSel4ArchAarch64)
         add_compile_options(-mstrict-align)
         if(NOT CMAKE_C_COMPILER_VERSION)
             message(FATAL_ERROR "CMAKE_C_COMPILER_VERSION is not set")
