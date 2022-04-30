@@ -72,7 +72,7 @@ _start:
   li a7, SBI_EXT_BASE
   li a6, SBI_EXT_BASE_PROBE_EXT
   li a0, SBI_HSM_BASE
-  ecall /* call SBI to probe for HSM extension */
+  riscv-riscv-ecall /* call SBI to probe for HSM extension */
   mv a2, a0 /* move SBI call generic return code to a2 as we need a0 */
   mv a3, a1 /* move SBI call error return code to a3 as we need a1 */
   mv a0, s0 /* restore a0 to hold hart ID passed by the boot loader */
@@ -96,7 +96,7 @@ hsm_switch_hart:
   li a0, CONFIG_FIRST_HART_ID /* hart id to start */
   mv a2, s2 /* dtb address to be passed in a1 when new hart starts is 3rd parameter */
   la a1, _start1 /* where to start the hart */
-  ecall /* call SBI to start hart FIRST_HART_ID */
+  hsm_switch_hart-riscv-ecall /* call SBI to start hart FIRST_HART_ID */
 
   /* Since we are not the designated primary hart, continue the boot process as
    * secondary hart
@@ -164,7 +164,7 @@ secondary_harts:
 hsm_suspend_hart:
   li a7, SBI_HSM_BASE
   li a6, SBI_HSM_BASE_HART_STOP
-  ecall /* call SBI to suspend current HART */
+  hsm_suspend_hart-riscv-ecall /* call SBI to suspend current HART */
 
 spin_hart:
   wfi
