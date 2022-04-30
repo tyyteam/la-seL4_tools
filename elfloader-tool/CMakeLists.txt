@@ -266,10 +266,10 @@ endif()
 
 # Construct the ELF loader's payload.
 MakeCPIO(archive.o "${cpio_files}" CPIO_SYMBOL _archive_start)
-
 set(PLATFORM_HEADER_DIR "${CMAKE_CURRENT_BINARY_DIR}/gen_headers")
 set(PLATFORM_INFO_H "${PLATFORM_HEADER_DIR}/platform_info.h")
 set(IMAGE_START_ADDR_H "${PLATFORM_HEADER_DIR}/image_start_addr.h")
+
 if(NOT "${IMAGE_START_ADDR}" STREQUAL "")
     # Generate static header files.  Their timestamps will change only if
     # their contents have changed on subsequent CMake reruns.
@@ -287,7 +287,6 @@ elseif(NOT DEFINED platform_yaml)
     message(FATAL_ERROR "IMAGE_START_ADDR not set and 'platform_yaml' undefined")
 
 else()
-
     # The following does two things. These commands are put together as for some weird
     # reason, CMake does not execute the first command if it's by itself. This could be
     # due to the CMakeLists.txt file in the capDL repository also invoking a similar command
@@ -322,7 +321,6 @@ else()
             "${ELF_SIFT}"
             "${SHOEHORN}"
     )
-
 endif()
 if(DEFINED KernelDTBPath)
     get_filename_component(KernelTools ${HARDWARE_GEN_PATH} DIRECTORY)
