@@ -19,11 +19,11 @@
 #define SBI_SHUTDOWN 8
 
 #define SBI_CALL(which, arg0, arg1, arg2) ({            \
-    register uintptr_t a0 asm ("a0") = (uintptr_t)(arg0);   \
-    register uintptr_t a1 asm ("a1") = (uintptr_t)(arg1);   \
-    register uintptr_t a2 asm ("a2") = (uintptr_t)(arg2);   \
-    register uintptr_t a7 asm ("a7") = (uintptr_t)(which);  \
-    asm volatile ("SBI_CALL-ecall"                   \
+    register uintptr_t a0 asm ("$a0") = (uintptr_t)(arg0);   \
+    register uintptr_t a1 asm ("$a1") = (uintptr_t)(arg1);   \
+    register uintptr_t a2 asm ("$a2") = (uintptr_t)(arg2);   \
+    register uintptr_t a7 asm ("$a7") = (uintptr_t)(which);  \
+    asm volatile ("syscall 0"                   \
               : "+r" (a0)               \
               : "r" (a1), "r" (a2), "r" (a7)        \
               : "memory");              \
@@ -34,12 +34,12 @@
 #define  SBI_HSM_HART_START 0
 
 #define SBI_EXT_CALL(extension, which, arg0, arg1, arg2) ({  \
-    register uintptr_t a0 asm ("a0") = (uintptr_t)(arg0);   \
-    register uintptr_t a1 asm ("a1") = (uintptr_t)(arg1);   \
-    register uintptr_t a2 asm ("a2") = (uintptr_t)(arg2);   \
-    register uintptr_t a6 asm ("a6") = (uintptr_t)(which);  \
-    register uintptr_t a7 asm ("a7") = (uintptr_t)(extension); \
-    asm volatile ("SBI_EXT_CALL-ecall"                   \
+    register uintptr_t a0 asm ("$a0") = (uintptr_t)(arg0);   \
+    register uintptr_t a1 asm ("$a1") = (uintptr_t)(arg1);   \
+    register uintptr_t a2 asm ("$a2") = (uintptr_t)(arg2);   \
+    register uintptr_t a6 asm ("$a6") = (uintptr_t)(which);  \
+    register uintptr_t a7 asm ("$a7") = (uintptr_t)(extension); \
+    asm volatile ("syscall 0"                   \
               : "+r" (a0)               \
               : "r" (a1), "r" (a2), "r" (a6), "r" (a7)      \
               : "memory");              \
