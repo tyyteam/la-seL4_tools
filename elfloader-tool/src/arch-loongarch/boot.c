@@ -52,10 +52,10 @@ struct image_info kernel_info;
 struct image_info user_info;
 
 unsigned long l1pt[PTES_PER_PT] __attribute__((aligned(4096)));
-#if __loongarch_xlen == 64
+// #if __loongarch_xlen == 64
 unsigned long l2pt[PTES_PER_PT] __attribute__((aligned(4096)));
 unsigned long l2pt_elf[PTES_PER_PT] __attribute__((aligned(4096)));
-#endif
+// #endif
 
 char elfloader_stack_alloc[BIT(CONFIG_KERNEL_STACK_BITS)];
 
