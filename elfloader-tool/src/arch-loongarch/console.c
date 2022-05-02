@@ -9,6 +9,6 @@
 
 int plat_console_putchar(unsigned int c)
 {
-    sbi_console_putchar(c);
+    //sbi_console_putchar(c);
     return 0;
 }

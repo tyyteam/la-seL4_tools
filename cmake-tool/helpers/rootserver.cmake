@@ -102,7 +102,6 @@ function(DeclareRootserver rootservername)
                 if("${CROSS_COMPILER_PREFIX}" STREQUAL "")
                     message(FATAL_ERROR "CROSS_COMPILER_PREFIX not set.")
                 endif()
-
                 if("${KernelOpenSBIPlatform}" STREQUAL "")
                     message(FATAL_ERROR "KernelOpenSBIPlatform not set.")
                 endif()
