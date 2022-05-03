@@ -52,7 +52,7 @@ _start:
 .option pop
 
   /* save the parameters passed */
-  mv s0, a0 /* preserve a0 (hart id) in s0 */
+  mv $s9, a0 /* preserve a0 (hart id) in $s9 */
   mv s2, a1 /* preserve a1 (dtb) in s2 */
 
   /* Attach the stack to sp before calling any C functions */
@@ -69,31 +69,31 @@ _start:
    * error code if not. On SBI_SUCCESS the value in a1 is 0 if the extension is
    * not available or an extension-specific non-zero value if it is available.
    */
-  li a7, SBI_EXT_BASE
-  li a6, SBI_EXT_BASE_PROBE_EXT
-  li a0, SBI_HSM_BASE
+  li.d a7, SBI_EXT_BASE
+  li.d a6, SBI_EXT_BASE_PROBE_EXT
+  li.d a0, SBI_HSM_BASE
   riscv-riscv-ecall /* call SBI to probe for HSM extension */
   mv a2, a0 /* move SBI call generic return code to a2 as we need a0 */
   mv a3, a1 /* move SBI call error return code to a3 as we need a1 */
-  mv a0, s0 /* restore a0 to hold hart ID passed by the boot loader */
+  mv a0, $s9 /* restore a0 to hold hart ID passed by the boot loader */
   mv a1, s2 /* restore a1 to hold dtb address passed by the boot loader */
   bnez a2, _start1 /* goto _start1 if SBI did not return SBI_SUCCESS (0) */
   beqz a3, _start1 /* goto _start1 if HSM extension is missing */
 
   /* Update global bool variable to tell boot code the HSM extension exists. */
   la t1, hsm_exists
-  li t2, 1
+  li.d t2, 1
   amoadd.w t1, t2, (t1)
 
   /*  Check if we are on CONFIG_FIRST_HART_ID */
-  li s1, CONFIG_FIRST_HART_ID
+  li.d s1, CONFIG_FIRST_HART_ID
   beq  a0, s1, _start1 /* goto _start1 if we are on CONFIG_FIRST_HART_ID */
 
   /* Use HSM extension to start hart CONFIG_FIRST_HART_ID. */
 hsm_switch_hart:
-  li a7, SBI_HSM_BASE
-  li a6, SBI_HSM_BASE_HART_START
-  li a0, CONFIG_FIRST_HART_ID /* hart id to start */
+  li.d a7, SBI_HSM_BASE
+  li.d a6, SBI_HSM_BASE_HART_START
+  li.d a0, CONFIG_FIRST_HART_ID /* hart id to start */
   mv a2, s2 /* dtb address to be passed in a1 when new hart starts is 3rd parameter */
   la a1, _start1 /* where to start the hart */
   hsm_switch_hart-riscv-ecall /* call SBI to start hart FIRST_HART_ID */
@@ -101,7 +101,7 @@ hsm_switch_hart:
   /* Since we are not the designated primary hart, continue the boot process as
    * secondary hart
    */
-  mv a0, s0 /* restore a0 to hold hart ID passed by OpenSBI */
+  mv a0, $s9 /* restore a0 to hold hart ID passed by OpenSBI */
   j secondary_harts
 
 
@@ -122,8 +122,8 @@ _start1: /* a0 must hold current hard ID passed by bootloader */
    *   a0 = hart id
    *   a1 = dtb
    */
-  la s0, main
-  jr s0
+  la $s9, main
+  jr $s9
 
 #if CONFIG_MAX_NUM_NODES > 1
 .extern next_logical_core_id
@@ -146,26 +146,26 @@ secondary_harts:
 
 #if CONFIG_MAX_NUM_NODES > 1
   la a1, next_logical_core_id
-  li t2, 1
+  li.d t2, 1
   amoadd.w t0, t2, (a1)
   /* now a1 has the logical core id */
-  li t2, CONFIG_MAX_NUM_NODES
+  li.d t2, CONFIG_MAX_NUM_NODES
   bge t0, t2, hsm_suspend_hart
 
   mv a1, t0
   slli t0, t0, 12
   la sp, bootstack_secondary_cores
   add sp, sp, t0
-  la s0, secondary_entry
-  jr s0
+  la $s9, secondary_entry
+  jr $s9
 #endif
 /* If we get here then the HSM extension exists and the current
  * HART is not going to be used and needs to be suspended. */
 hsm_suspend_hart:
-  li a7, SBI_HSM_BASE
-  li a6, SBI_HSM_BASE_HART_STOP
-  hsm_suspend_hart-riscv-ecall /* call SBI to suspend current HART */
+  li.d $a7, SBI_HSM_BASE
+  li.d $a6, SBI_HSM_BASE_HART_STOP
+  syscall 0 /* call SBI to suspend current HART */
 
 spin_hart:
-  wfi
-  j spin_hart
+  idle 0
+  b spin_hart
