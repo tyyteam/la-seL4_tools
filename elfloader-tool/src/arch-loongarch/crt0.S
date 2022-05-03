@@ -8,7 +8,7 @@
 #include <elfloader/gen_config.h>
 
 .extern main
-.extern __global_pointer$
+# .extern __global_pointer$
 .extern elfloader_stack_alloc
 .extern hsm_exists
 
@@ -45,22 +45,16 @@
 .global _start
 _start:
 
-.option push
-.option norelax
-1:auipc gp, %pcrel_hi(__global_pointer$)
-  addi  gp, gp, %pcrel_lo(1b)
-.option pop
-
   /* save the parameters passed */
-  mv $s9, a0 /* preserve a0 (hart id) in $s9 */
-  mv s2, a1 /* preserve a1 (dtb) in s2 */
+  move $s0, $a0 /* preserve a0 (hart id) in s0 */
+  move $s2, $a1 /* preserve a1 (dtb) in s2 */
 
   /* Attach the stack to sp before calling any C functions */
-  la sp, (elfloader_stack_alloc + BIT(12))
+  # la $sp, (elfloader_stack_alloc + BIT(12))
 
 #ifdef CONFIG_IMAGE_BINARY
 /* Clear the BSS before we get to do anything more specific */
-  jal clear_bss
+  bl clear_bss
 #endif
 
   /* Check if the Heart State Management (HSM) extension exists, so it can be
@@ -69,103 +63,98 @@ _start:
    * error code if not. On SBI_SUCCESS the value in a1 is 0 if the extension is
    * not available or an extension-specific non-zero value if it is available.
    */
-  li.d a7, SBI_EXT_BASE
-  li.d a6, SBI_EXT_BASE_PROBE_EXT
-  li.d a0, SBI_HSM_BASE
-  riscv-riscv-ecall /* call SBI to probe for HSM extension */
-  mv a2, a0 /* move SBI call generic return code to a2 as we need a0 */
-  mv a3, a1 /* move SBI call error return code to a3 as we need a1 */
-  mv a0, $s9 /* restore a0 to hold hart ID passed by the boot loader */
-  mv a1, s2 /* restore a1 to hold dtb address passed by the boot loader */
-  bnez a2, _start1 /* goto _start1 if SBI did not return SBI_SUCCESS (0) */
-  beqz a3, _start1 /* goto _start1 if HSM extension is missing */
+  li.d $a7, SBI_EXT_BASE
+  li.d $a6, SBI_EXT_BASE_PROBE_EXT
+  # li.d $a0, SBI_HSM_BASE
+  # riscv-riscv-ecall /* call SBI to probe for HSM extension */
+  # mv a2, a0 /* move SBI call generic return code to a2 as we need a0 */
+  # mv a3, a1 /* move SBI call error return code to a3 as we need a1 */
+  move $a0, $s9 /* restore a0 to hold hart ID passed by the boot loader */
+  move $a1, $s1 /* restore a1 to hold dtb address passed by the boot loader */
+  bnez $a2, _start1 /* goto _start1 if SBI did not return SBI_SUCCESS (0) */
+  beqz $a3, _start1 /* goto _start1 if HSM extension is missing */
 
   /* Update global bool variable to tell boot code the HSM extension exists. */
-  la t1, hsm_exists
-  li.d t2, 1
-  amoadd.w t1, t2, (t1)
+  # la t1, hsm_exists
+  # li t2, 1
+  # amoadd.w t1, t2, (t1)
 
   /*  Check if we are on CONFIG_FIRST_HART_ID */
-  li.d s1, CONFIG_FIRST_HART_ID
-  beq  a0, s1, _start1 /* goto _start1 if we are on CONFIG_FIRST_HART_ID */
+  li.d $s0, CONFIG_FIRST_HART_ID
+  beq  $a0, $s0, _start1 /* goto _start1 if we are on CONFIG_FIRST_HART_ID */
 
   /* Use HSM extension to start hart CONFIG_FIRST_HART_ID. */
 hsm_switch_hart:
-  li.d a7, SBI_HSM_BASE
-  li.d a6, SBI_HSM_BASE_HART_START
-  li.d a0, CONFIG_FIRST_HART_ID /* hart id to start */
-  mv a2, s2 /* dtb address to be passed in a1 when new hart starts is 3rd parameter */
-  la a1, _start1 /* where to start the hart */
-  hsm_switch_hart-riscv-ecall /* call SBI to start hart FIRST_HART_ID */
+  # li.d $a7, SBI_HSM_BASE
+  li.d $a6, SBI_HSM_BASE_HART_START
+  li.d $a0, CONFIG_FIRST_HART_ID /* hart id to start */
+  move $a2, $s1 /* dtb address to be passed in a1 when new hart starts is 3rd parameter */
+  la $a1, _start1 /* where to start the hart */
+  # hsm_switch_hart-riscv-ecall /* call SBI to start hart FIRST_HART_ID */
 
   /* Since we are not the designated primary hart, continue the boot process as
    * secondary hart
    */
-  mv a0, $s9 /* restore a0 to hold hart ID passed by OpenSBI */
-  j secondary_harts
+  move $a0, $s9 /* restore a0 to hold hart ID passed by OpenSBI */
+  # b secondary_harts
 
 
 _start1: /* a0 must hold current hard ID passed by bootloader */
          /* a1 must hold dtb address passed by bootloader */
-.option push
-.option norelax
-1:auipc gp, %pcrel_hi(__global_pointer$)
-  addi  gp, gp, %pcrel_lo(1b)
-.option pop
 
   /* Attach the stack to sp before calling any C functions */
   /* This HART may be a different HART to the one that started at _start
    * If we've switched HARTs then the other HART will get a different stack
    * region in secondary_harts. */
-  la sp, (elfloader_stack_alloc + BIT(12))
+  # la $sp, (elfloader_stack_alloc + BIT(12))
   /* The C code expects the registers to be set up as:
    *   a0 = hart id
    *   a1 = dtb
    */
   la $s9, main
-  jr $s9
+  jirl $zero, $9, 0
 
-#if CONFIG_MAX_NUM_NODES > 1
-.extern next_logical_core_id
-.data
-bootstack_secondary_cores:
-.align 12
-.space 4096 * (CONFIG_MAX_NUM_NODES - 1)
-#endif
+# #if CONFIG_MAX_NUM_NODES > 1
+# .extern next_logical_core_id
+# .data
+# bootstack_secondary_cores:
+# .align 12
+# .space 4096 * (CONFIG_MAX_NUM_NODES - 1)
+# #endif
 
-.text
+# .text
 
-.global secondary_harts
-secondary_harts:
+# .global secondary_harts
+# secondary_harts:
 
-.option push
-.option norelax
-1:auipc gp, %pcrel_hi(__global_pointer$)
-  addi  gp, gp, %pcrel_lo(1b)
-.option pop
+# .option push
+# .option norelax
+# 1:auipc gp, %pcrel_hi(__global_pointer$)
+#   addi  gp, gp, %pcrel_lo(1b)
+# .option pop
 
-#if CONFIG_MAX_NUM_NODES > 1
-  la a1, next_logical_core_id
-  li.d t2, 1
-  amoadd.w t0, t2, (a1)
+# #if CONFIG_MAX_NUM_NODES > 1
+#   la a1, next_logical_core_id
+#   li.d t2, 1
+#   amoadd.w t0, t2, (a1)
   /* now a1 has the logical core id */
-  li.d t2, CONFIG_MAX_NUM_NODES
-  bge t0, t2, hsm_suspend_hart
+#   li.d t2, CONFIG_MAX_NUM_NODES
+#   bge t0, t2, hsm_suspend_hart
 
-  mv a1, t0
-  slli t0, t0, 12
-  la sp, bootstack_secondary_cores
-  add sp, sp, t0
-  la $s9, secondary_entry
-  jr $s9
-#endif
+#   mv a1, t0
+#   slli t0, t0, 12
+#   la sp, bootstack_secondary_cores
+#   add sp, sp, t0
+#   la $s9, secondary_entry
+#   jr $s9
+# #endif
 /* If we get here then the HSM extension exists and the current
  * HART is not going to be used and needs to be suspended. */
-hsm_suspend_hart:
-  li.d $a7, SBI_HSM_BASE
-  li.d $a6, SBI_HSM_BASE_HART_STOP
-  syscall 0 /* call SBI to suspend current HART */
+# hsm_suspend_hart:
+#   li.d $a7, SBI_HSM_BASE
+#   li.d $a6, SBI_HSM_BASE_HART_STOP
+#   syscall 0 /* call SBI to suspend current HART */
 
-spin_hart:
-  idle 0
-  b spin_hart
+# spin_hart:
+#   idle 0
+#   b spin_hart
