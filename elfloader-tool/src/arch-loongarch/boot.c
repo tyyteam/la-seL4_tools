@@ -76,7 +76,7 @@ void NORETURN abort(void)
      * idle state until something happens.
      */
     for (;;) {
-        asm volatile("wfi" ::: "memory");
+        asm volatile("idle 0" ::: "memory");
     }
 
     UNREACHABLE();
@@ -168,26 +168,35 @@ static void set_and_wait_for_ready(int hart_id, int core_id)
 }
 #endif
 
-static inline void sfence_vma(void)
+// static inline void sfence_vma(void)
+// {
+//     asm volatile("sfence.vma" ::: "memory");
+// }
+static inline void dbar(void)
 {
-    asm volatile("sfence.vma" ::: "memory");
+    asm volatile("dbar 0" ::: "memory");
 }
-
-static inline void ifence(void)
+// static inline void ifence(void)
+// {
+//     asm volatile("fence.i" ::: "memory");
+// }
+static inline void ibar(void)
 {
-    asm volatile("fence.i" ::: "memory");
+    asm volatile("ibar 0" ::: "memory");
 }
 
 static inline void enable_virtual_memory(void)
 {
-    sfence_vma();
-    asm volatile(
-        "csrw satp, %0\n"
-        :
-        : "r"(vm_mode | (uintptr_t)l1pt >> RISCV_PGSHIFT)
-        :
-    );
-    ifence();
+    // sfence_vma();
+    dbar();
+    // asm volatile(
+    //     "csrw satp, %0\n"
+    //     :
+    //     : "r"(vm_mode | (uintptr_t)l1pt >> RISCV_PGSHIFT)
+    //     :
+    // );
+    // ifence();
+    ibar();
 }
 
 static int run_elfloader(UNUSED int hart_id, void *bootloader_dtb)
