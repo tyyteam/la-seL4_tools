@@ -69,7 +69,7 @@ _start:
   # riscv-riscv-ecall /* call SBI to probe for HSM extension */
   # mv a2, a0 /* move SBI call generic return code to a2 as we need a0 */
   # mv a3, a1 /* move SBI call error return code to a3 as we need a1 */
-  move $a0, $s9 /* restore a0 to hold hart ID passed by the boot loader */
+  move $a0, $fp /* restore a0 to hold hart ID passed by the boot loader */
   move $a1, $s1 /* restore a1 to hold dtb address passed by the boot loader */
   bnez $a2, _start1 /* goto _start1 if SBI did not return SBI_SUCCESS (0) */
   beqz $a3, _start1 /* goto _start1 if HSM extension is missing */
@@ -95,7 +95,7 @@ hsm_switch_hart:
   /* Since we are not the designated primary hart, continue the boot process as
    * secondary hart
    */
-  move $a0, $s9 /* restore a0 to hold hart ID passed by OpenSBI */
+  move $a0, $fp /* restore a0 to hold hart ID passed by OpenSBI */
   # b secondary_harts
 
 
@@ -111,8 +111,8 @@ _start1: /* a0 must hold current hard ID passed by bootloader */
    *   a0 = hart id
    *   a1 = dtb
    */
-  la $s9, main
-  jirl $zero, $9, 0
+  la $fp, main
+  jirl $zero, $fp, 0
 
 # #if CONFIG_MAX_NUM_NODES > 1
 # .extern next_logical_core_id
@@ -145,8 +145,8 @@ _start1: /* a0 must hold current hard ID passed by bootloader */
 #   slli t0, t0, 12
 #   la sp, bootstack_secondary_cores
 #   add sp, sp, t0
-#   la $s9, secondary_entry
-#   jr $s9
+#   la $fp, secondary_entry
+#   jr $fp
 # #endif
 /* If we get here then the HSM extension exists and the current
  * HART is not going to be used and needs to be suspended. */
