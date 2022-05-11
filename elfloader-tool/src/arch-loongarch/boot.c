@@ -8,12 +8,14 @@
 #include <autoconf.h>
 #include <elfloader/gen_config.h>
 
+#include <drivers.h>
+#include <drivers/uart.h>
+#include <printf.h>
 #include <types.h>
 #include <binaries/elf/elf.h>
 #include <elfloader.h>
 #include <abort.h>
 #include <cpio/cpio.h>
-#include <sbi.h>
 
 #define PT_LEVEL_1 1
 #define PT_LEVEL_2 2
@@ -298,7 +300,10 @@ void secondary_entry(int hart_id, int core_id)
 
 void main(int hart_id, void *bootloader_dtb)
 {
-    /* Printing uses SBI, so there is no need to initialize any UART. */
+    /* initialize platform so that we can print to a UART */
+    initialise_devices();
+
+    /* Printing uses UART*/
     printf("ELF-loader started on (HART %d) (NODES %d)\n",
            hart_id, CONFIG_MAX_NUM_NODES);
 

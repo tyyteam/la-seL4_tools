@@ -73,7 +73,7 @@ config_option(
     ElfloaderIncludeDtb ELFLOADER_INCLUDE_DTB
     "Include DTB in the CPIO in case bootloader doesn't provide one"
     DEFAULT ON
-    DEPENDS "KernelArchARM OR KernelArchRiscV"
+    DEPENDS "KernelArchARM OR KernelArchRiscV OR KernelArchLoongarch"
     DEFAULT_DISABLED OFF
 )
 
