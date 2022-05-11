@@ -116,7 +116,11 @@ static int run_elfloader(UNUSED int hart_id, void *bootloader_dtb)
 
 
     printf("Jumping to kernel-image entry point...\n\n");
-    ((init_loongarch_kernel_t)kernel_info.virt_entry)(user_info.phys_region_start,
+    printf("kernel_phys_region_start: %p\n", kernel_info.phys_region_start);
+    printf("kernel_phys_region_end: %p\n", kernel_info.phys_region_end);
+    printf("kernel_phys_virt_offset: %p\n", kernel_info.phys_virt_offset);
+    printf("kernel_virt_entry: %p\n", kernel_info.virt_entry);
+    ((init_loongarch_kernel_t)kernel_info.phys_region_start)(user_info.phys_region_start,
                                                   user_info.phys_region_end,
                                                   user_info.phys_virt_offset,
                                                   user_info.virt_entry,
@@ -171,7 +175,7 @@ extern void uart_puts(char *s);
 void main(int hart_id, void *bootloader_dtb)
 {
     uart_init();
-    uart_puts("Hello, Loongarch");
+    uart_puts("Hello, Loongarch\n");
     /* Printing uses SBI, so there is no need to initialize any UART. */
     printf("ELF-loader started on (HART %d) (NODES %d)\n",
            hart_id, CONFIG_MAX_NUM_NODES);
