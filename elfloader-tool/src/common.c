@@ -461,6 +461,7 @@ int load_images(
         dtb = bootloader_dtb;
     }
 
+    *chosen_dtb_size = 0;
     /*
      * Move the DTB out of the way, if it's present.
      */
@@ -571,6 +572,9 @@ int load_images(
                      - ROUND_UP(total_user_image_size, PAGE_BITS);
 
 #endif /* CONFIG_ELFLOADER_ROOTSERVERS_LAST */
+
+    /*CY 临时 */
+    // next_phys_addr = ROUND_UP(kernel_phys_end, PAGE_BITS);
 
     *num_images = 0;
     for (unsigned int i = 0; i < max_user_images; i++) {
