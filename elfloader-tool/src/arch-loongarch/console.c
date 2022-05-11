@@ -5,7 +5,6 @@
  */
 
 #include <elfloader_common.h>
-#include "sbi.h"
 
 /*
 int plat_console_putchar(unsigned int c)

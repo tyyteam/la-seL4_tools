@@ -13,7 +13,7 @@
  * information here. All parameters are just register values (or stack values
  * that are register-sized).
  */
-typedef void (*init_riscv_kernel_t)(word_t ui_p_reg_start,
+typedef void (*init_loongarch_kernel_t)(word_t ui_p_reg_start,
                                     word_t ui_p_reg_end,
                                     word_t pv_offset,
                                     word_t v_entry,
