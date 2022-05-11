@@ -6,10 +6,11 @@
 
 #include <elfloader_common.h>
 
-/*
+extern int uart_putc(char ch);
+
 int plat_console_putchar(unsigned int c)
 {
-    //sbi_console_putchar(c);
+    uart_putc(c);
     return 0;
 }
-*/
+
