@@ -21,23 +21,12 @@
 
 #define UART_REG_LSR_TFE BIT(5)
 
-
-// /* This bit is set if the transmit FIFO can accept at least one byte.*/
-// #define MU_LSR_TXEMPTY  BIT(5)
-// /* This bit is set if the transmit FIFO is empty and the
-//  * transmitter is idle. (Finished shifting out the last bit). */
-// #define MU_LSR_TXIDLE   BIT(6)
-
-// #define MU_LCR_DLAB     BIT(7)
-// #define MU_LCR_BREAK    BIT(6)
-// #define MU_LCR_DATASIZE BIT(0)
-long mmio=0x1fe001e0L;
-#define UART_REG(mmio, x) ((volatile uint32_t *)((mmio) + (x)))
+#define UART_REG(mmio, x) ((volatile uint8_t *)((mmio) + (x)))
 
 static int loongson3A5000_uart_putchar(struct elfloader_device *dev, unsigned int c)
 {
-    // volatile void *mmio = dev->region_bases[0];//0x1fe001e0L
-    while (!(*UART_REG(mmio, UART_REG_LSR) & UART_REG_LSR_TsFE));
+    volatile void *mmio = dev->region_bases[0];
+    while (!(*UART_REG(mmio, UART_REG_LSR) & UART_REG_LSR_TFE));
     *UART_REG(mmio, UART_REG_DAT) = (c & 0xff);
 
     return 0;
