@@ -123,6 +123,12 @@ static int run_elfloader(UNUSED int hart_id, void *bootloader_dtb)
     printf("kernel_phys_region_end: %p\n", kernel_info.phys_region_end);
     printf("kernel_phys_virt_offset: %p\n", kernel_info.phys_virt_offset);
     printf("kernel_virt_entry: %p\n", kernel_info.virt_entry);
+    printf("ui_phys_region_start: %p\n", user_info.phys_region_start);
+    printf("ui_phys_region_end: %p\n", user_info.phys_region_end);
+    printf("ui_phys_virt_offset: %p\n", user_info.phys_virt_offset);
+    printf("ui_virt_entry: %p\n", user_info.virt_entry);
+    printf("dtb physical address: %p\n", (word_t)dtb);
+    printf("dtb size: %d\n", dtb_size);
     ((init_loongarch_kernel_t)kernel_info.phys_region_start)(user_info.phys_region_start,
                                                   user_info.phys_region_end,
                                                   user_info.phys_virt_offset,
