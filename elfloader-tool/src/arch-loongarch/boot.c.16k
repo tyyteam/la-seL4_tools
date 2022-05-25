@@ -21,7 +21,7 @@
 
 #define PT_LEVELS 3
 
-#define PS_DEFAULT_SIZE 0x00000019
+#define PS_DEFAULT_SIZE 0x0000000e
 
 #define PT_LEVEL_1 1
 #define PT_LEVEL_2 2
@@ -38,13 +38,13 @@
 
 #define PTES_PER_PT BIT(PT_INDEX_BITS)
 
-#define PTE_HUGE_PA_SHIFT 24
+#define PTE_PA_SHIFT 12
 
-#define PTE_HUGE_PA(PT_BASE) (unsigned long)(((PT_BASE) >> LOONGARCH_L2PGSHIFT) << LOONGARCH_L2PGSHIFT)
-#define PTE_GSRWXV 0x11D3
+#define PTE_PA(PT_BASE) (unsigned long)(((PT_BASE) >> LOONGARCH_L3PGSHIFT) << LOONGARCH_L3PGSHIFT)
+#define PTE_GSRWXV 0x1D3
 
 #define PTE_CREATE_NEXT(PT_BASE) (unsigned long)PT_BASE
-#define PTE_CREATE_HUGE_LEAF(PT_BASE) (unsigned long)(PTE_HUGE_PA(PT_BASE) | PTE_GSRWXV)
+#define PTE_CREATE_LEAF(PT_BASE) (unsigned long)(PTE_PA(PT_BASE) | PTE_GSRWXV)
 
 #define GET_PT_INDEX(addr, n) (((addr) >> (((PT_INDEX_BITS) * ((PT_LEVELS) - (n))) + LOONGARCH_L3PGSHIFT)) % PTES_PER_PT)
 
@@ -52,6 +52,7 @@
 
 unsigned long l1pt[PTES_PER_PT] __attribute__((aligned(16384)));
 unsigned long l2pt[PTES_PER_PT] __attribute__((aligned(16384)));
+unsigned long l3pt[32][PTES_PER_PT] __attribute__((aligned(16384)));
 
 struct image_info kernel_info;
 struct image_info user_info;
@@ -155,12 +156,21 @@ static int map_kernel_window(struct image_info *kernel_info)
     printf("l2pt:%p\n", PTE_CREATE_NEXT((uintptr_t)l2pt));
     /*CY 获取kernel的起始虚拟地址对应的二级页页号 */
     index = GET_PT_INDEX(kernel_info->virt_region_start, PT_LEVEL_2);
+    for (unsigned int i = 0; i < 32; i++, index++) {
+        l2pt[index] = PTE_CREATE_NEXT((uintptr_t)l3pt[i]);
+        printf("l3pt:%p\n", l2pt[index]);
+    }
 
-    /*CY 映射kernel的二级页表的页表项 */
-    for (unsigned int page = 0; index < PTES_PER_PT; index++, page++) {
-        l2pt[index] = PTE_CREATE_HUGE_LEAF(kernel_info->phys_region_start +
-                                     (page << PT_LEVEL_2_BITS));
-        if (page == 0) printf("l2pte0:%p\n", l2pt[index]);
+    index = GET_PT_INDEX(kernel_info->virt_region_start, PT_LEVEL_3);
+    /*CY 映射kernel的三级页表的页表项 */
+    unsigned int page = 0;
+    for (unsigned int i = 0; i < 32; ++i) {
+        for (; index < PTES_PER_PT; index++, page++) {
+            l3pt[i][index] = PTE_CREATE_LEAF(kernel_info->phys_region_start +
+                                        (page << PT_LEVEL_3_BITS));
+            if (i == 0) printf("l3pte:%p\n", l3pt[i][index]);
+        }
+        index = 0;
     }
 
     return 0;
@@ -170,7 +180,7 @@ static inline void enable_virtual_memory(void)
 {
     setup_pw();
     init_tlb();
-    enable_pg(0xb0);
+    // enable_pg(0xb0);
 }
 
 static int run_elfloader(UNUSED int hart_id, void *bootloader_dtb)

@@ -6,6 +6,23 @@
 
 #pragma once
 
+#define PASTE(a, b) a ## b
+
+#ifdef __ASSEMBLER__
+
+#define UL_CONST(x) x
+#define ULL_CONST(x) x
+#define NULL 0
+
+#else /* not __ASSEMBLER__ */
+
+#define UL_CONST(x) PASTE(x, ul)
+#define ULL_CONST(x) PASTE(x, llu)
+#define NULL ((void *)0)
+
+#endif
+
+#define LOONGARCH_CSR_CRMD		0x0	/* Current mode info */
 #define LOONGARCH_CSR_PRMD		0x1	/* Prev-exception mode info */
 #define LOONGARCH_CSR_EUEN		0x2	/* Extended unit enable */
 #define LOONGARCH_CSR_MISC		0x3	/* Misc config */
@@ -18,9 +35,65 @@
 
 /* TLB related CSR registers */
 #define LOONGARCH_CSR_TLBIDX		0x10	/* TLB Index, EHINV, PageSize, NP */
+#define  CSR_TLBIDX_EHINV_SHIFT		31
+#define  CSR_TLBIDX_EHINV		(UL_CONST(1) << CSR_TLBIDX_EHINV_SHIFT)
+#define  CSR_TLBIDX_PS_SHIFT		24
+#define  CSR_TLBIDX_PS_WIDTH		6
+#define  CSR_TLBIDX_PS			(UL_CONST(0x3f) << CSR_TLBIDX_PS_SHIFT)
+#define  CSR_TLBIDX_IDX_SHIFT		0
+#define  CSR_TLBIDX_IDX_WIDTH		12
+#define  CSR_TLBIDX_IDX			(UL_CONST(0xfff) << CSR_TLBIDX_IDX_SHIFT)
+#define  CSR_TLBIDX_SIZEM		0x3f000000
+#define  CSR_TLBIDX_SIZE		CSR_TLBIDX_PS_SHIFT
+#define  CSR_TLBIDX_IDXM		0xfff
+#define  CSR_INVALID_ENTRY(e)		(CSR_TLBIDX_EHINV | e)
+
 #define LOONGARCH_CSR_TLBEHI		0x11	/* TLB EntryHi */
 #define LOONGARCH_CSR_TLBELO0		0x12	/* TLB EntryLo0 */
+#define  CSR_TLBLO0_RPLV_SHIFT		63
+#define  CSR_TLBLO0_RPLV		(UL_CONST(0x1) << CSR_TLBLO0_RPLV_SHIFT)
+#define  CSR_TLBLO0_NX_SHIFT		62
+#define  CSR_TLBLO0_NX			(UL_CONST(0x1) << CSR_TLBLO0_NX_SHIFT)
+#define  CSR_TLBLO0_NR_SHIFT		61
+#define  CSR_TLBLO0_NR			(UL_CONST(0x1) << CSR_TLBLO0_NR_SHIFT)
+#define  CSR_TLBLO0_PFN_SHIFT		12
+#define  CSR_TLBLO0_PFN_WIDTH		36
+#define  CSR_TLBLO0_PFN			(UL_CONST(0xfffffffff) << CSR_TLBLO0_PFN_SHIFT)
+#define  CSR_TLBLO0_GLOBAL_SHIFT	6
+#define  CSR_TLBLO0_GLOBAL		(UL_CONST(0x1) << CSR_TLBLO0_GLOBAL_SHIFT)
+#define  CSR_TLBLO0_CCA_SHIFT		4
+#define  CSR_TLBLO0_CCA_WIDTH		2
+#define  CSR_TLBLO0_CCA			(UL_CONST(0x3) << CSR_TLBLO0_CCA_SHIFT)
+#define  CSR_TLBLO0_PLV_SHIFT		2
+#define  CSR_TLBLO0_PLV_WIDTH		2
+#define  CSR_TLBLO0_PLV			(UL_CONST(0x3) << CSR_TLBLO0_PLV_SHIFT)
+#define  CSR_TLBLO0_WE_SHIFT		1
+#define  CSR_TLBLO0_WE			(UL_CONST(0x1) << CSR_TLBLO0_WE_SHIFT)
+#define  CSR_TLBLO0_V_SHIFT		0
+#define  CSR_TLBLO0_V			(UL_CONST(0x1) << CSR_TLBLO0_V_SHIFT)
+
 #define LOONGARCH_CSR_TLBELO1		0x13	/* TLB EntryLo1 */
+#define  CSR_TLBLO1_RPLV_SHIFT		63
+#define  CSR_TLBLO1_RPLV		(UL_CONST(0x1) << CSR_TLBLO1_RPLV_SHIFT)
+#define  CSR_TLBLO1_NX_SHIFT		62
+#define  CSR_TLBLO1_NX			(UL_CONST(0x1) << CSR_TLBLO1_NX_SHIFT)
+#define  CSR_TLBLO1_NR_SHIFT		61
+#define  CSR_TLBLO1_NR			(UL_CONST(0x1) << CSR_TLBLO1_NR_SHIFT)
+#define  CSR_TLBLO1_PFN_SHIFT		12
+#define  CSR_TLBLO1_PFN_WIDTH		36
+#define  CSR_TLBLO1_PFN			(UL_CONST(0xfffffffff) << CSR_TLBLO1_PFN_SHIFT)
+#define  CSR_TLBLO1_GLOBAL_SHIFT	6
+#define  CSR_TLBLO1_GLOBAL		(UL_CONST(0x1) << CSR_TLBLO1_GLOBAL_SHIFT)
+#define  CSR_TLBLO1_CCA_SHIFT		4
+#define  CSR_TLBLO1_CCA_WIDTH		2
+#define  CSR_TLBLO1_CCA			(UL_CONST(0x3) << CSR_TLBLO1_CCA_SHIFT)
+#define  CSR_TLBLO1_PLV_SHIFT		2
+#define  CSR_TLBLO1_PLV_WIDTH		2
+#define  CSR_TLBLO1_PLV			(UL_CONST(0x3) << CSR_TLBLO1_PLV_SHIFT)
+#define  CSR_TLBLO1_WE_SHIFT		1
+#define  CSR_TLBLO1_WE			(UL_CONST(0x1) << CSR_TLBLO1_WE_SHIFT)
+#define  CSR_TLBLO1_V_SHIFT		0
+#define  CSR_TLBLO1_V			(UL_CONST(0x1) << CSR_TLBLO1_V_SHIFT)
 
 #define LOONGARCH_CSR_GTLBC		0x15	/* Guest TLB control */
 #define LOONGARCH_CSR_TRGP		0x16	/* TLBR read guest info */
@@ -80,6 +153,8 @@
 #define LOONGARCH_CSR_TLBRELO0		0x8c	/* TLB refill entrylo0 */
 #define LOONGARCH_CSR_TLBRELO1		0x8d	/* TLB refill entrylo1 */
 #define LOONGARCH_CSR_TLBREHI		0x8e	/* TLB refill entryhi */
+#define  CSR_TLBREHI_PS_SHIFT		0
+#define  CSR_TLBREHI_PS			(UL_CONST(0x3f) << CSR_TLBREHI_PS_SHIFT)
 #define LOONGARCH_CSR_TLBRPRMD		0x8f	/* TLB refill mode info */
 
 /* Machine Error registers */
@@ -221,3 +296,82 @@
 #define LOONGARCH_CSR_DEBUG		0x500	/* debug config */
 #define LOONGARCH_CSR_DERA		0x501	/* debug era */
 #define LOONGARCH_CSR_DESAVE		0x502	/* debug save */
+
+#ifndef __ASSEMBLER__
+#include <larchintrin.h>
+#include <types.h>
+
+static inline uint32_t csr_readl(uint32_t reg)
+{
+	return __csrrd(reg);
+}
+
+static inline uint64_t csr_readq(uint32_t reg)
+{
+	return __dcsrrd(reg);
+}
+
+static inline void csr_writel(uint32_t val, uint32_t reg)
+{
+	__csrwr(val, reg);
+}
+
+static inline void csr_writeq(unsigned long val, unsigned int reg)
+{
+	__dcsrwr(val, reg);
+}
+
+static inline void enable_pg(unsigned long val)
+{
+	asm volatile("csrwr %0, 0x0" : : "r"(val));
+}
+
+static inline void write_csr_pgdl(unsigned long val)
+{
+    asm volatile("csrwr %0, 0x19" : : "r" (val));
+}
+
+static inline void write_csr_pgdh(unsigned long val)
+{
+    asm volatile("csrwr %0, 0x1a" : : "r" (val));
+}
+
+static inline void write_csr_pwcl(unsigned long val)
+{
+    asm volatile("csrwr %0, 0x1c" : : "r" (val));
+}
+
+static inline void write_csr_pwch(unsigned long val)
+{
+    asm volatile("csrwr %0, 0x1d" : : "r" (val));
+}
+
+static inline void write_csr_tlbrentry(unsigned long val)
+{
+    asm volatile("csrwr %0, 0x88" : : "r" (val));
+}
+
+static inline unsigned int read_csr_pagesize(void)
+{
+	return (__csrrd(LOONGARCH_CSR_TLBIDX) & CSR_TLBIDX_SIZEM) >> CSR_TLBIDX_SIZE;
+}
+
+static inline void write_csr_pagesize(unsigned int size)
+{
+	__csrxchg(size << CSR_TLBIDX_SIZE, CSR_TLBIDX_SIZEM, LOONGARCH_CSR_TLBIDX);
+}
+
+static inline unsigned int read_csr_tlbrefill_pagesize(void)
+{
+	return (__dcsrrd(LOONGARCH_CSR_TLBREHI) & CSR_TLBREHI_PS) >> CSR_TLBREHI_PS_SHIFT;
+}
+
+static inline void write_csr_tlbrefill_pagesize(unsigned int size)
+{
+	__dcsrxchg(size << CSR_TLBREHI_PS_SHIFT, CSR_TLBREHI_PS, LOONGARCH_CSR_TLBREHI);
+}
+
+#define read_csr_stlbpgsize()		__csrrd(LOONGARCH_CSR_STLBPGSIZE)
+#define write_csr_stlbpgsize(val)	__csrwr(val, LOONGARCH_CSR_STLBPGSIZE)
+
+#endif

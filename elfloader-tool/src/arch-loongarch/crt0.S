@@ -35,7 +35,20 @@ _start:
 
 _start1: /* a0 must hold current hard ID passed by bootloader */
          /* a1 must hold dtb address passed by bootloader */
+  li.d		$t0, 0x9000000000000011	# CA, PLV0, 0x9000 xxxx xxxx xxxx
+	csrwr		$t0, LOONGARCH_CSR_DMWIN1
 
+	li.w		$t0, 0xb0		# PLV=0, IE=0, PG=1
+	csrwr		$t0, LOONGARCH_CSR_CRMD
+	li.w		$t0, 0x04		# PLV=0, PIE=1, PWE=0
+	csrwr		$t0, LOONGARCH_CSR_PRMD
+	li.w		$t0, 0x00		# FPE=0, SXE=0, ASXE=0, BTE=0
+	csrwr		$t0, LOONGARCH_CSR_EUEN
+
+  la.abs	$t0, 0f
+	jirl		$zero, $t0, 0
+
+0:
   /* Attach the stack to sp before calling any C functions */
   la $sp, elfloader_stack_alloc
   li.w $t0, 1
