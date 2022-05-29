@@ -1,11 +1,11 @@
-/* SPDX-License-Identifier: GPL-2.0 */
 /*
+ * Copyright 2022, tyyteam(Qingtao Liu, Yang Lei, Yang Chen)
+ * qtliu@mail.ustc.edu.cn, le24@mail.ustc.edu.cn, chenyangcs@mail.ustc.edu.cn
+ * 
+ * Derived from:
  * Copyright (C) 2020-2021 Loongson Technology Corporation Limited
- */
- /*
- * Copyright 2022, tyyteam
  *
- * SPDX-License-Identifier: GPL-2.0-only
+ * SPDX-License-Identifier: GPL-2.0
  */
 
  #include <machine.h>
