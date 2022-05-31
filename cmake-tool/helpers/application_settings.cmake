@@ -178,7 +178,6 @@ function(correct_platform_strings)
     set(kernel_var "")
 
     foreach(item IN LISTS platform_aliases)
-
         if(item MATCHES "^-(.*)$")
             set(block_kernel_var "${CMAKE_MATCH_1}")
             continue()
@@ -230,7 +229,6 @@ function(correct_platform_strings)
         set(${kernel_var} "${PLATFORM}" CACHE STRING "" FORCE)
 
     endforeach()
-
     if(NOT kernel_var)
         set(KernelPlatform "${PLATFORM}" CACHE STRING "" FORCE)
     endif()
