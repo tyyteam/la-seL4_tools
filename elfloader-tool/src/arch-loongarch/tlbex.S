@@ -20,8 +20,9 @@
 	lddir	$t0, $t0, 1
 	ldpte	$t0, 0
 	ldpte	$t0, 1
-	# csrrd   $t1, LOONGARCH_CSR_TLBRELO0
-	# csrrd   $t2, LOONGARCH_CSR_TLBRELO1
 	tlbfill
+	csrrd   $t0, LOONGARCH_CSR_TLBREHI
+	csrrd   $t0, LOONGARCH_CSR_TLBRELO0
+	csrrd   $t0, LOONGARCH_CSR_TLBRELO1
 	csrrd	$t0, LOONGARCH_CSR_TLBRSAVE
 	ertn
