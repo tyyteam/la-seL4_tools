@@ -12,7 +12,11 @@
 typedef uintptr_t paddr_t;
 typedef uintptr_t vaddr_t;
 
+#ifdef CONFIG_ARCH_LOONGARCH
+#define PAGE_BITS           14
+#else
 #define PAGE_BITS           12
+#endif
 
 #define BIT(x)              (1 << (x))
 #define MASK(n)             (BIT(n) - 1)
