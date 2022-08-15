@@ -154,9 +154,7 @@ static int map_kernel_window(struct image_info *kernel_info)
     /*CY 获取kernel的起始虚拟地址对应的一级页页号 */
     index = GET_PT_INDEX(kernel_info->virt_region_start, PT_LEVEL_1);
 
-    printf("l1pt:%p\n", (uintptr_t)l1pt);
     l1pt[index] = PTE_CREATE_NEXT((uintptr_t)l2pt);
-    printf("l2pt:%p\n", PTE_CREATE_NEXT((uintptr_t)l2pt));
     /*CY 获取kernel的起始虚拟地址对应的二级页页号 */
     index = GET_PT_INDEX(kernel_info->virt_region_start, PT_LEVEL_2);
 
@@ -164,7 +162,6 @@ static int map_kernel_window(struct image_info *kernel_info)
     for (unsigned int page = 0; index < PTES_PER_PT; index++, page++) {
         l2pt[index] = PTE_CREATE_HUGE_LEAF(kernel_info->phys_region_start +
                                      (page << PT_LEVEL_2_BITS));
-        if (page == 0) printf("l2pte0:%p\n", l2pt[index]);
     }
 
     return 0;
