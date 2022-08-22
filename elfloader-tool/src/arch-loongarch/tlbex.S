@@ -8,7 +8,10 @@
  * SPDX-License-Identifier: GPL-2.0
  */
 
- #include <machine.h>
+# The level2 page directory base we designed is 36, which can`t be filled 
+# in csr.pwcl.Dir2_base. Because csr.pwcl.Dir2_base is 5 bit length(0~2^5-1).
+# Instead, we write 36 into csr.pwch.Dir3_base, which is 6 bit length(2^6-1 = 63 > 36).
+# See LoongArch manual for details.
 
 
  .section ".text", "ax"
