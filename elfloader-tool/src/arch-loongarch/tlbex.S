@@ -12,7 +12,7 @@
 # in csr.pwcl.Dir2_base. Because csr.pwcl.Dir2_base is 5 bit length(0~2^5-1).
 # Instead, we write 36 into csr.pwch.Dir3_base, which is 6 bit length(2^6-1 = 63 > 36).
 # See LoongArch manual for details.
-
+#include <machine.h>
 
  .section ".text", "ax"
  .global handle_tlb_refill
