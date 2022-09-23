@@ -39,6 +39,8 @@ _start:
 
 _start1: /* a0 must hold current hard ID passed by bootloader */
          /* a1 must hold dtb address passed by bootloader */
+  li.d    $t0, 0x0000000000000011 # CA, PLV0, 0x0000 xxxx xxxx xxxx
+  csrwr   $t0, LOONGARCH_CSR_DMWIN0
   li.d		$t0, 0x9000000000000011	# CA, PLV0, 0x9000 xxxx xxxx xxxx
 	csrwr		$t0, LOONGARCH_CSR_DMWIN1
 
