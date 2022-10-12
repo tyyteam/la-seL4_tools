@@ -26,30 +26,36 @@ SECTIONS
     .text :
     {
         *(.text)
+        . = ALIGN(16K);
+        elfloader_tlbrefillentry = .;
+        *(elfloader_tlbrefillentry)
+        . = ALIGN(16K);
+        elfloader_debug_eentry = .;
+        *(elfloader_debug_eentry)
     }
-    . = ALIGN(16);
+    . = ALIGN(16K);
     .rodata :
     {
         *(.srodata*)
-        . = ALIGN(16);
+        . = ALIGN(16K);
         *(.rodata)
         *(.rodata.*)
         /*
          * ld crashes when we add this here: *(_driver_list)
          */
-        . = ALIGN(16);
+        . = ALIGN(16K);
         _archive_start = .;
         *(._archive_cpio)
         _archive_end = .;
     }
-    . = ALIGN(16);
+    . = ALIGN(16K);
     .data :
     {
         *(.sdata*)
         *(.data)
         *(.data.*)
     }
-    . = ALIGN(16);
+    . = ALIGN(16K);
     .bss :
     {
         _bss = .;

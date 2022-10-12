@@ -13,8 +13,7 @@
 # Instead, we write 36 into csr.pwch.Dir3_base, which is 6 bit length(2^6-1 = 63 > 36).
 # See LoongArch manual for details.
 #include <machine.h>
-
- .section ".text", "ax"
+ .section elfloader_tlbrefillentry
  .global handle_tlb_refill
  handle_tlb_refill:
 	csrwr	$t0, LOONGARCH_CSR_TLBRSAVE

@@ -352,6 +352,11 @@ static inline void write_csr_tlbrentry(unsigned long val)
     asm volatile("csrwr %0, 0x88" : : "r" (val));
 }
 
+static inline void write_csr_elf_debug_eentry(unsigned long val)
+{
+    asm volatile("csrwr %0, 0xc"::"r"(val));
+}
+
 static inline unsigned int read_csr_pagesize(void)
 {
 	return (__csrrd(LOONGARCH_CSR_TLBIDX) & CSR_TLBIDX_SIZEM) >> CSR_TLBIDX_SIZE;

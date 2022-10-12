@@ -25,7 +25,7 @@
 
 #define PT_LEVELS 3
 
-#define PS_DEFAULT_SIZE 0x00000019
+#define PS_DEFAULT_SIZE 0x00000024
 
 #define PT_LEVEL_1 1
 #define PT_LEVEL_2 2
@@ -35,6 +35,7 @@
 #define PT_LEVEL_2_BITS 25
 #define PT_LEVEL_3_BITS 14
 
+#define LOONGARCH_L1PGSHIFT PT_LEVEL_1_BITS
 #define LOONGARCH_L2PGSHIFT PT_LEVEL_2_BITS
 #define LOONGARCH_L3PGSHIFT PT_LEVEL_3_BITS
 
@@ -44,10 +45,12 @@
 
 #define PTE_HUGE_PA_SHIFT 24
 
+#define PTE_64GHUGE_PA(PT_BASE) (unsigned long)(((PT_BASE) >> LOONGARCH_L1PGSHIFT) << LOONGARCH_L1PGSHIFT)
 #define PTE_HUGE_PA(PT_BASE) (unsigned long)(((PT_BASE) >> LOONGARCH_L2PGSHIFT) << LOONGARCH_L2PGSHIFT)
 #define PTE_GSRWXV 0x11D3
 
 #define PTE_CREATE_NEXT(PT_BASE) (unsigned long)PT_BASE
+#define PTE_CREATE_64GHUGE_LEAF(PT_BASE) (unsigned long)(PTE_64GHUGE_PA(PT_BASE)|PTE_GSRWXV)
 #define PTE_CREATE_HUGE_LEAF(PT_BASE) (unsigned long)(PTE_HUGE_PA(PT_BASE) | PTE_GSRWXV)
 
 #define GET_PT_INDEX(addr, n) (((addr) >> (((PT_INDEX_BITS) * ((PT_LEVELS) - (n))) + LOONGARCH_L3PGSHIFT)) % PTES_PER_PT)
@@ -66,7 +69,14 @@ char elfloader_stack_alloc[BIT(CONFIG_KERNEL_STACK_BITS)];
 void const *dtb = NULL;
 size_t dtb_size = 0;
 
-unsigned long tlbrentry;
+// unsigned long tlbrentry;
+
+
+void NORETURN elfloader_panic(){
+    printf("Oh man, entered trap in elfloader!");
+    abort();
+}
+
 
 /*
  * overwrite the default implementation for abort()
@@ -120,6 +130,7 @@ static inline void ibar(void)
 }
 
 extern void handle_tlb_refill(void);
+extern void elfloader_trap_entry(void);
 
 static void setup_tlb_handler(void)
 {
@@ -145,24 +156,31 @@ static int map_kernel_window(struct image_info *kernel_info)
 
     /* Map the kernel into the new address space */
 
-    if (!VIRT_PHYS_ALIGNED(kernel_info->virt_region_start,
-                           kernel_info->phys_region_start, PT_LEVEL_2_BITS)) {
-        printf("ERROR: Kernel not properly aligned\n");
-        return -1;
-    }
+    // if (!VIRT_PHYS_ALIGNED((unsigned long)(kernel_info->virt_region_start),
+    //                        (unsigned long)(kernel_info->phys_region_start), PT_LEVEL_2_BITS)) {
+    //     printf("ERROR: Kernel not properly aligned\n");
+    //     return -1;
+    // }
+    // if(!IS_ALIGNED((kernel_info->virt_region_start), (PT_LEVEL_1_BITS))){
+    //     printf("ERROR: Kernel not properly aligned\n");
+    //     return -1;
+    // }
+    
 
     /*CY 获取kernel的起始虚拟地址对应的一级页页号 */
     index = GET_PT_INDEX(kernel_info->virt_region_start, PT_LEVEL_1);
 
-    l1pt[index] = PTE_CREATE_NEXT((uintptr_t)l2pt);
-    /*CY 获取kernel的起始虚拟地址对应的二级页页号 */
-    index = GET_PT_INDEX(kernel_info->virt_region_start, PT_LEVEL_2);
+    l1pt[index] =PTE_CREATE_64GHUGE_LEAF(kernel_info->phys_region_start);
 
-    /*CY 映射kernel的二级页表的页表项 */
-    for (unsigned int page = 0; index < PTES_PER_PT; index++, page++) {
-        l2pt[index] = PTE_CREATE_HUGE_LEAF(kernel_info->phys_region_start +
-                                     (page << PT_LEVEL_2_BITS));
-    }
+    // l1pt[index] = PTE_CREATE_NEXT((uintptr_t)l2pt);
+    // /*CY 获取kernel的起始虚拟地址对应的二级页页号 */
+    // index = GET_PT_INDEX(kernel_info->virt_region_start, PT_LEVEL_2);
+
+    // /*CY 映射kernel的二级页表的页表项 */
+    // for (unsigned int page = 0; index < PTES_PER_PT; index++, page++) {
+    //     l2pt[index] = PTE_CREATE_HUGE_LEAF(kernel_info->phys_region_start +
+    //                                  (page << PT_LEVEL_2_BITS));
+    // }
 
     return 0;
 }
@@ -201,6 +219,9 @@ static int run_elfloader(UNUSED int hart_id, void *bootloader_dtb)
 
     printf("Enabling MMU and paging\n");
     enable_virtual_memory();
+
+    printf("setting trap entry\n");
+    write_csr_elf_debug_eentry((unsigned long)elfloader_trap_entry);
 
     printf("Jumping to kernel-image entry point...\n\n");
     printf("kernel_phys_region_start: %p\n", kernel_info.phys_region_start);

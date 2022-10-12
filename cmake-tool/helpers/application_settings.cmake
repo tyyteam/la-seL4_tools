@@ -53,7 +53,7 @@ function(ApplyData61ElfLoaderSettings kernel_platform kernel_sel4_arch)
         set(IMAGE_START_ADDR 0x80400000 CACHE INTERNAL "" FORCE)
     endif()
     if(KernelPlatform3A5000 AND KernelSel4ArchLoongarch64)
-       set(IMAGE_START_ADDR 0x02000000 CACHE INTERNAL "" FORCE)
+       set(IMAGE_START_ADDR 0x9000000002000000 CACHE INTERNAL "" FORCE) #32MB alignment
     endif()
 endfunction()
 
