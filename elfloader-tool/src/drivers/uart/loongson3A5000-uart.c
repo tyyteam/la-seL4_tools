@@ -21,7 +21,8 @@
 
 #define UART_REG_LSR_TFE BIT(5)
 
-#define UART_REG(mmio, x) ((volatile uint8_t *)((mmio) + (x)))
+#define UART_REG(mmio, x) ((volatile uint8_t *)(((unsigned long)(mmio) + (x))|0x6000000000000000))
+// #define UART_REG(mmio, x) ((volatile uint8_t *)((mmio) + (x))) //For qemu-system-loongarch64
 
 static int loongson3A5000_uart_putchar(struct elfloader_device *dev, unsigned int c)
 {
