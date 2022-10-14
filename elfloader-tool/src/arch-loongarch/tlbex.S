@@ -15,16 +15,24 @@
 #include <machine.h>
  .section elfloader_tlbrefillentry
  .global handle_tlb_refill
- handle_tlb_refill:
+handle_tlb_refill:
 	csrwr	$t0, LOONGARCH_CSR_TLBRSAVE
+	csrwr	$t1, LOONGARCH_CSR_KS6	/* use t1 for debugging */
+	csrrd   $t1, LOONGARCH_CSR_TLBREHI
 	csrrd	$t0, LOONGARCH_CSR_PGD
+	csrrd   $t1, LOONGARCH_CSR_TLBREHI
 	lddir	$t0, $t0, 3
+	csrrd   $t1, LOONGARCH_CSR_TLBREHI
 	lddir	$t0, $t0, 1
+	csrrd   $t1, LOONGARCH_CSR_TLBREHI
 	ldpte	$t0, 0
+	csrrd   $t1, LOONGARCH_CSR_TLBREHI
 	ldpte	$t0, 1
+	csrrd   $t1, LOONGARCH_CSR_TLBREHI
 	tlbfill
-	csrrd   $t0, LOONGARCH_CSR_TLBREHI
-	csrrd   $t0, LOONGARCH_CSR_TLBRELO0
-	csrrd   $t0, LOONGARCH_CSR_TLBRELO1
-	csrrd	$t0, LOONGARCH_CSR_TLBRSAVE
+	csrrd   $t1, LOONGARCH_CSR_TLBREHI
+	csrrd   $t1, LOONGARCH_CSR_TLBRELO0
+	csrrd   $t1, LOONGARCH_CSR_TLBRELO1
+	csrwr	$t1, LOONGARCH_CSR_KS6
+	csrwr	$t0, LOONGARCH_CSR_TLBRSAVE
 	ertn

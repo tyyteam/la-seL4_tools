@@ -25,7 +25,8 @@
 
 #define PT_LEVELS 3
 
-#define PS_DEFAULT_SIZE 0x00000024
+#define PS_DEFAULT_64GSIZE 36
+#define PS_DEFAULT_32MSIZE 25
 
 #define PT_LEVEL_1 1
 #define PT_LEVEL_2 2
@@ -73,7 +74,7 @@ size_t dtb_size = 0;
 
 
 void NORETURN elfloader_panic(){
-    printf("Oh man, entered trap in elfloader!");
+    printf("Oh man, entered trap in elfloader!\n");
     abort();
 }
 
@@ -139,11 +140,11 @@ static void setup_tlb_handler(void)
 
 static void init_tlb(void)
 {
-    write_csr_pagesize(PS_DEFAULT_SIZE);
-    write_csr_stlbpgsize(PS_DEFAULT_SIZE);
-    write_csr_tlbrefill_pagesize(PS_DEFAULT_SIZE);
+    write_csr_pagesize(PS_DEFAULT_32MSIZE);
+    write_csr_stlbpgsize(PS_DEFAULT_32MSIZE);
+    write_csr_tlbrefill_pagesize(PS_DEFAULT_32MSIZE);
 
-    if (read_csr_pagesize() != PS_DEFAULT_SIZE)
+    if (read_csr_pagesize() != PS_DEFAULT_32MSIZE)
         printf("MMU doesn't support PAGE_SIZE\n");
 
     setup_tlb_handler();
@@ -156,31 +157,27 @@ static int map_kernel_window(struct image_info *kernel_info)
 
     /* Map the kernel into the new address space */
 
-    // if (!VIRT_PHYS_ALIGNED((unsigned long)(kernel_info->virt_region_start),
-    //                        (unsigned long)(kernel_info->phys_region_start), PT_LEVEL_2_BITS)) {
-    //     printf("ERROR: Kernel not properly aligned\n");
-    //     return -1;
-    // }
-    // if(!IS_ALIGNED((kernel_info->virt_region_start), (PT_LEVEL_1_BITS))){
-    //     printf("ERROR: Kernel not properly aligned\n");
-    //     return -1;
-    // }
+    if (!VIRT_PHYS_ALIGNED((unsigned long)(kernel_info->virt_region_start),
+                           (unsigned long)(kernel_info->phys_region_start), PT_LEVEL_2_BITS)) {
+        printf("ERROR: Kernel not properly aligned\n");
+        return -1;
+    }
     
 
     /*CY 获取kernel的起始虚拟地址对应的一级页页号 */
     index = GET_PT_INDEX(kernel_info->virt_region_start, PT_LEVEL_1);
 
-    l1pt[index] =PTE_CREATE_64GHUGE_LEAF(kernel_info->phys_region_start);
+    // l1pt[index] =PTE_CREATE_64GHUGE_LEAF(kernel_info->phys_region_start);
 
-    // l1pt[index] = PTE_CREATE_NEXT((uintptr_t)l2pt);
-    // /*CY 获取kernel的起始虚拟地址对应的二级页页号 */
-    // index = GET_PT_INDEX(kernel_info->virt_region_start, PT_LEVEL_2);
+    l1pt[index] = PTE_CREATE_NEXT((uintptr_t)l2pt);
+    /*CY 获取kernel的起始虚拟地址对应的二级页页号 */
+    index = GET_PT_INDEX(kernel_info->virt_region_start, PT_LEVEL_2);
 
-    // /*CY 映射kernel的二级页表的页表项 */
-    // for (unsigned int page = 0; index < PTES_PER_PT; index++, page++) {
-    //     l2pt[index] = PTE_CREATE_HUGE_LEAF(kernel_info->phys_region_start +
-    //                                  (page << PT_LEVEL_2_BITS));
-    // }
+    /*CY 映射kernel的二级页表的页表项 */
+    for (unsigned int page = 0; index < PTES_PER_PT; index++, page++) {
+        l2pt[index] = PTE_CREATE_HUGE_LEAF(kernel_info->phys_region_start +
+                                     (page << PT_LEVEL_2_BITS));
+    }
 
     return 0;
 }
