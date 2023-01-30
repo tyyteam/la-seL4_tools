@@ -43,6 +43,8 @@ _start1: /* a0 must hold current hard ID passed by bootloader */
   csrwr   $t0, LOONGARCH_CSR_DMWIN0
   li.d		$t0, 0x9000000000000011	# CA, PLV0, 0x9000 xxxx xxxx xxxx
 	csrwr		$t0, LOONGARCH_CSR_DMWIN1
+  # li.d		$t0, 0x0000000000000011	# CA, PLV0, 0x9000 xxxx xxxx xxxx
+	# csrwr		$t0, LOONGARCH_CSR_DMWIN2
 
 	li.w		$t0, 0xb0		# PLV=0, IE=0, PG=1
 	csrwr		$t0, LOONGARCH_CSR_CRMD
