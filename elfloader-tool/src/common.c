@@ -573,7 +573,6 @@ int load_images(
 
 #endif /* CONFIG_ELFLOADER_ROOTSERVERS_LAST */
 
-    /*CY 临时 */
     // next_phys_addr = ROUND_UP(kernel_phys_end, PAGE_BITS);
 
     *num_images = 0;

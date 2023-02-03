@@ -27,14 +27,12 @@ _start:
   li.d $t1, CONFIG_FIRST_HART_ID
   bne $t0, $t1, spin_hart
 
-/*CY 这一块暂时不改 */
 #ifdef CONFIG_IMAGE_BINARY
 /* Clear the BSS before we get to do anything more specific */
   jal clear_bss
 #endif
 
   move $a0, $t0
-  /*CY TODO 这里还要传dtb地址到a1 */
   b _start1
 
 _start1: /* a0 must hold current hard ID passed by bootloader */
